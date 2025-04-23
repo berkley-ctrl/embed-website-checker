@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cool Embed Checker</title>
+    <style>
+        /* Cool CSS Styling */
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap'); /* Import a modern font */
+
+        :root {
+            --primary-color: #6a11cb; /* Purple */
+            --secondary-color: #2575fc; /* Blue */
+            --background-light: #f8f9fa;
+            --text-color: #333;
+            --white: #ffffff;
+            --success-color: #28a745;
+            --warning-color: #dc3545;
+            --shadow-color: rgba(0, 0, 0, 0.15);
+            --border-color: #dee2e6;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif; /* Use imported font */
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: var(--white);
+            padding: 40px; /* Increased padding */
+            border-radius: 15px; /* More rounded corners */
+            box-shadow: 0 8px 25px var(--shadow-color);
+            text-align: center;
+            width: 90%;
+            max-width: 500px; /* Limit max width */
+            transition: transform 0.3s ease; /* Add subtle transition */
+        }
+        .container:hover {
+            transform: translateY(-5px); /* Slight lift on hover */
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin-bottom: 25px;
+            font-weight: 600;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: 400; /* Lighter font weight */
+            color: #555; /* Slightly lighter text */
+            font-size: 0.95em;
+        }
+
+        input[type="url"] {
+            width: calc(100% - 24px); /* Account for padding */
+            padding: 12px; /* Increased padding */
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px; /* Rounded input */
+            font-size: 1em;
+            font-family: inherit; /* Use body font */
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+        input[type="url"]:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+            box-shadow: 0 0 0 3px rgba(37, 117, 252, 0.25); /* Focus ring */
+        }
+
+        button {
+            padding: 12px 25px; /* Adjusted padding */
+            background: linear-gradient(90deg, var(--primary-color) 0%, var(--secondary-color) 100%);
+            color: var(--white);
+            border: none;
+            border-radius: 8px; /* Rounded button */
+            cursor: pointer;
+            font-size: 1.05em; /* Slightly larger */
+            font-weight: 600;
+            font-family: inherit;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        button:hover {
+            transform: translateY(-2px); /* Lift on hover */
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.2);
+        }
+        button:active {
+            transform: translateY(0px); /* Press down effect */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.15);
+        }
+
+        #message {
+            margin-top: 25px;
+            font-weight: 400; /* Lighter weight */
+            padding: 10px;
+            border-radius: 6px;
+            font-size: 0.95em;
+        }
+        #message:empty { /* Hide if empty */
+             padding: 0;
+             margin-top: 0;
+        }
+
+        /* Style message based on class */
+        #message.warning {
+            color: var(--warning-color);
+            background-color: #f8d7da; /* Light red background */
+            border: 1px solid #f5c6cb; /* Reddish border */
+        }
+        #message.success {
+            color: var(--success-color);
+            background-color: #d4edda; /* Light green background */
+            border: 1px solid #c3e6cb; /* Greenish border */
+        }
+         #message.info { /* Style for 'Checking...' message */
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border: 1px solid #bee5eb;
+        }
+
+        /* Hidden iframe for testing - no visual change needed */
+        .hidden-iframe {
+            position: absolute;
+            left: -9999px;
+            top: -9999px;
+            width: 1px;
+            height: 1px;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>URL Embed Checker</h1> <label for="urlInput">Enter URL to Check:</label> <input type="url" id="urlInput" placeholder="https://example.com" required>
+    <button id="checkButton">Check & Open</button> <p id="message"></p>
+</div>
+
+<script>
+    // JavaScript Logic (Exactly the same as before)
+    const urlInput = document.getElementById('urlInput');
+    const checkButton = document.getElementById('checkButton');
+    const messageArea = document.getElementById('message');
+
+    checkButton.addEventListener('click', () => {
+        const url = urlInput.value.trim();
+        messageArea.textContent = ''; // Clear previous messages
+        messageArea.className = '';   // Clear previous classes
+
+        if (!url) {
+            messageArea.textContent = 'Please enter a URL.';
+            messageArea.className = 'warning';
+            return;
+        }
+
+        try {
+            new URL(url);
+        } catch (_) {
+            messageArea.textContent = 'Invalid URL format.';
+            messageArea.className = 'warning';
+            return;
+        }
+
+        messageArea.textContent = 'Checking...';
+        messageArea.className = 'info'; // Use info class for checking state
+
+        const existingFrame = document.getElementById('test-iframe');
+        if (existingFrame) {
+            existingFrame.remove();
+        }
+
+        const iframe = document.createElement('iframe');
+        iframe.id = 'test-iframe';
+        iframe.className = 'hidden-iframe';
+        iframe.sandbox = 'allow-scripts allow-same-origin';
+
+        let loaded = false;
+        let errored = false;
+        const timeoutDuration = 5000;
+        const timeoutId = setTimeout(() => {
+            if (!loaded && !errored) {
+                handleFailure("Warning: Timed out. The URL might not be embeddable or took too long to respond.");
+            }
+        }, timeoutDuration);
+
+        iframe.onload = () => {
+            if(errored) return;
+            loaded = true;
+            clearTimeout(timeoutId);
+            console.log('Iframe loaded (potentially embeddable):', url);
+            messageArea.textContent = 'URL appears embeddable. Opening in new tab...';
+            messageArea.className = 'success';
+            openInBlank(url);
+            iframe.remove();
+        };
+
+        iframe.onerror = (e) => {
+             if(loaded) return;
+             errored = true;
+             clearTimeout(timeoutId);
+             console.error('Iframe error (likely not embeddable):', url, e);
+             handleFailure("Warning: This URL cannot be embedded likely due to server restrictions (X-Frame-Options or CSP).");
+        };
+
+        const handleFailure = (msg) => {
+            messageArea.textContent = msg;
+            messageArea.className = 'warning';
+            iframe.remove();
+        }
+
+        iframe.src = url;
+        document.body.appendChild(iframe);
+
+        setTimeout(() => {
+            if (!loaded && !errored && !iframe.contentWindow) {
+                 try {
+                    let x = iframe.contentWindow.document;
+                 } catch (e) {
+                    if (!loaded && !errored) {
+                        console.warn('Possible silent block detected for:', url);
+                        clearTimeout(timeoutId);
+                        handleFailure("Warning: This URL likely cannot be embedded due to server restrictions.");
+                    }
+                 }
+            }
+        }, 100);
+    });
+
+    function openInBlank(urlToEmbed) {
+        const newWindow = window.open('about:blank', '_blank');
+        if (newWindow) {
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Embedded Content</title>
+                    <style>
+                        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; }
+                        iframe { width: 100%; height: 100%; border: none; }
+                    </style>
+                </head>
+                <body>
+                    <iframe src="${urlToEmbed}"></iframe>
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
+        } else {
+            messageArea.textContent = 'Failed to open new window. Please check your browser popup settings.';
+            messageArea.className = 'warning';
+        }
+    }
+</script>
+
+</body>
+</html>
